@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Orders — Admin | Tikka Masala Chat Corner</title>
+  <meta name="description" content="Manage all customer orders, update statuses, and verify delivery OTPs.">
+  <link rel="stylesheet" href="../css/main.css">
+  <link rel="stylesheet" href="../css/admin.css">
+</head>
+<body class="admin-body">
+
+  <div class="admin-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-brand">
+        <a href="dashboard.html" class="sidebar-logo">
+          <div class="sidebar-logo-icon">🍛</div>
+          <div>
+            <div class="sidebar-logo-text">Tikka Masala</div>
+            <div class="sidebar-logo-sub">Admin Panel</div>
+          </div>
+        </a>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="sidebar-section-label">Main</div>
+        <a href="dashboard.html" class="sidebar-link"><span class="link-icon">📊</span> Dashboard</a>
+        <a href="orders.html" class="sidebar-link active"><span class="link-icon">🛍️</span> Orders</a>
+        <div class="sidebar-section-label">Catalog</div>
+        <a href="products.html" class="sidebar-link"><span class="link-icon">🍽️</span> Products</a>
+        <a href="categories.html" class="sidebar-link"><span class="link-icon">🏷️</span> Categories</a>
+        <a href="inventory.html" class="sidebar-link"><span class="link-icon">📦</span> Inventory</a>
+        <div class="sidebar-section-label">Analytics</div>
+        <a href="sales.html" class="sidebar-link"><span class="link-icon">📈</span> Sales Charts</a>
+        <a href="reports.html" class="sidebar-link"><span class="link-icon">📋</span> Reports</a>
+        <a href="customers.html" class="sidebar-link"><span class="link-icon">👥</span> Customers</a>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="sidebar-user">
+          <div class="sidebar-avatar">👤</div>
+          <div><div class="sidebar-username admin-username">Admin</div><div class="sidebar-role">Administrator</div></div>
+          <button class="btn btn-ghost btn-sm admin-logout" style="margin-left:auto;color:rgba(255,255,255,.6);font-size:1.2rem">⏏</button>
+        </div>
+      </div>
+    </aside>
+
+    <div class="admin-content">
+      <header class="admin-header">
+        <div style="display:flex;align-items:center;gap:1rem">
+          <button class="sidebar-toggle" id="sidebar-toggle">☰</button>
+          <div class="admin-page-title">🛍️ Order Management</div>
+        </div>
+        <div class="admin-header-right">
+          <button class="notification-btn" title="Notifications">
+            🔔
+            <div class="notification-badge hidden" id="notification-badge">0</div>
+          </button>
+          <button class="btn btn-primary btn-sm" onclick="loadAdminOrders()">🔄 Refresh</button>
+        </div>
+      </header>
+
+      <main class="admin-main">
+        <!-- New Order Notifications -->
+        <div id="notifications-container"></div>
+
+        <!-- Filters -->
+        <div class="admin-section" style="margin-bottom:1.5rem">
+          <div class="admin-section-body" style="display:flex;gap:1rem;align-items:center;flex-wrap:wrap">
+            <select id="status-filter" class="form-control" style="width:200px" onchange="filterOrders()">
+              <option value="">All Statuses</option>
+              <option value="NEW">New</option>
+              <option value="PAYMENT_VERIFIED">Payment Verified</option>
+              <option value="ACCEPTED">Accepted</option>
+              <option value="PREPARING">Preparing</option>
+              <option value="READY">Ready</option>
+              <option value="OUT_FOR_DELIVERY">Out for Delivery</option>
+              <option value="DELIVERED">Delivered</option>
+              <option value="CANCELLED">Cancelled</option>
+            </select>
+            <select id="type-filter" class="form-control" style="width:160px" onchange="filterOrders()">
+              <option value="">All Types</option>
+              <option value="DELIVERY">Delivery</option>
+              <option value="PICKUP">Pickup</option>
+            </select>
+            <input type="text" id="search-order" class="form-control" style="width:220px" placeholder="🔍 Search order # or name..." oninput="filterOrders()">
+            <button class="btn btn-ghost btn-sm" onclick="clearFilters()">Clear</button>
+          </div>
+        </div>
+
+        <!-- Orders Table -->
+        <div class="admin-section">
+          <div class="admin-section-header">
+            <div class="admin-section-title">All Orders</div>
+            <div class="text-muted" style="font-size:.82rem" id="orders-count"></div>
+          </div>
+          <div class="table-wrapper">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Order #</th>
+                  <th>Customer</th>
+                  <th>Items</th>
+                  <th>Total</th>
+                  <th>Payment</th>
+                  <th>Type</th>
+                  <th>Status</th>
+                  <th>Placed</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="admin-orders-table-body">
+                <tr><td colspan="9" class="text-center text-muted" style="padding:3rem">Loading orders...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Delivery OTP Modal -->
+  <div class="modal-overlay hidden" id="otp-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">🔑 Verify Delivery OTP</div>
+        <button class="modal-close" onclick="closeOTPModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="otp-order-id">
+        <p style="color:var(--text-muted);margin-bottom:1rem;font-size:.9rem">Enter the 6-digit OTP the customer received on their mobile to confirm delivery.</p>
+        <div class="otp-verify-form">
+          <div class="form-group" style="flex:1;margin:0">
+            <input type="text" id="delivery-otp-input" class="form-control" placeholder="Enter 6-digit OTP" maxlength="6" pattern="[0-9]{6}" style="font-size:1.4rem;text-align:center;letter-spacing:.3em;font-weight:700">
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeOTPModal()">Cancel</button>
+        <button id="verify-otp-btn" class="btn btn-primary" onclick="verifyDeliveryOTP()">🔑 Verify &amp; Deliver</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Order Detail Modal -->
+  <div class="modal-overlay hidden" id="order-detail-modal">
+    <div class="modal" style="max-width:620px">
+      <div class="modal-header">
+        <div class="modal-title" id="order-detail-title">Order Details</div>
+        <button class="modal-close" onclick="document.getElementById('order-detail-modal').classList.add('hidden')">×</button>
+      </div>
+      <div class="modal-body" id="order-detail-body">Loading...</div>
+    </div>
+  </div>
+
+  <div id="toast-container"></div>
+
+  <script src="../js/api.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/websocket.js"></script>
+  <script src="../js/admin.js"></script>
+  <script>
+    requireAdminAuth();
+    initAdminNav();
+    initAdminWebSocket();
+
+    let allOrders = [];
+
+    async function loadAdminOrders() {
+      const container = document.getElementById('admin-orders-table-body');
+      container.innerHTML = '<tr><td colspan="9" class="text-center text-muted" style="padding:3rem">Loading...</td></tr>';
+      try {
+        allOrders = await api.get('/api/admin/orders');
+        document.getElementById('orders-count').textContent = `${allOrders.length} total orders`;
+        renderOrders(allOrders);
+      } catch (err) {
+        container.innerHTML = `<tr><td colspan="9"><div class="alert alert-error">${err.message}</div></td></tr>`;
+      }
+    }
+
+    function renderOrders(orders) {
+      const container = document.getElementById('admin-orders-table-body');
+      if (!orders.length) {
+        container.innerHTML = '<tr><td colspan="9" class="text-center text-muted" style="padding:3rem">No orders found.</td></tr>';
+        return;
+      }
+      container.innerHTML = orders.map(o => `
+        <tr>
+          <td><strong>${o.order_number}</strong></td>
+          <td>${o.customer_name}<br><small class="text-muted">${o.customer_mobile}</small></td>
+          <td style="max-width:180px">${(o.items||[]).map(i => `${i.product_name} ×${i.quantity}`).join('<br>')}</td>
+          <td><strong>${formatPrice(o.total)}</strong></td>
+          <td><span class="badge badge-${o.payment_status === 'PAID' ? 'success' : 'warning'}">${o.payment_status||'—'}</span></td>
+          <td><span class="badge badge-secondary">${o.order_type}</span></td>
+          <td><span class="badge status-${o.status}">${o.status.replace(/_/g,' ')}</span></td>
+          <td>${timeAgo(o.created_at)}</td>
+          <td>
+            <div class="actions">
+              <button class="btn btn-ghost btn-sm" onclick="viewOrderDetail(${o.id})" title="View Details">🔍</button>
+              ${getStatusButtons(o.id, o.status)}
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function filterOrders() {
+      const status = document.getElementById('status-filter').value;
+      const type = document.getElementById('type-filter').value;
+      const search = document.getElementById('search-order').value.toLowerCase();
+      const filtered = allOrders.filter(o => {
+        if (status && o.status !== status) return false;
+        if (type && o.order_type !== type) return false;
+        if (search && !o.order_number.toLowerCase().includes(search) && !o.customer_name.toLowerCase().includes(search)) return false;
+        return true;
+      });
+      renderOrders(filtered);
+    }
+
+    function clearFilters() {
+      document.getElementById('status-filter').value = '';
+      document.getElementById('type-filter').value = '';
+      document.getElementById('search-order').value = '';
+      renderOrders(allOrders);
+    }
+
+    async function viewOrderDetail(orderId) {
+      const modal = document.getElementById('order-detail-modal');
+      const body = document.getElementById('order-detail-body');
+      modal.classList.remove('hidden');
+      body.innerHTML = '<div class="text-center" style="padding:2rem"><span class="spinner"></span></div>';
+      try {
+        const o = await api.get(`/api/admin/orders/${orderId}`);
+        document.getElementById('order-detail-title').textContent = `Order ${o.order_number}`;
+        body.innerHTML = `
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem">
+            <div><div class="text-muted" style="font-size:.8rem">Customer</div><div style="font-weight:600">${o.customer_name}</div><div class="text-muted" style="font-size:.85rem">${o.customer_mobile}</div></div>
+            <div><div class="text-muted" style="font-size:.8rem">Order Type</div><div style="font-weight:600">${o.order_type}</div></div>
+            <div><div class="text-muted" style="font-size:.8rem">Status</div><span class="badge status-${o.status}">${o.status.replace(/_/g,' ')}</span></div>
+            <div><div class="text-muted" style="font-size:.8rem">Payment</div><span class="badge badge-${o.payment_status==='PAID'?'success':'warning'}">${o.payment_status||'—'}</span></div>
+          </div>
+          ${o.address ? `<div class="alert alert-info" style="margin-bottom:1rem">📍 ${o.address}</div>` : ''}
+          <table class="table" style="margin-bottom:1rem">
+            <thead><tr><th>Item</th><th>Qty</th><th>Price</th><th>Subtotal</th></tr></thead>
+            <tbody>
+              ${(o.items||[]).map(i=>`<tr><td>${i.product_name}</td><td>${i.quantity}</td><td>${formatPrice(i.unit_price)}</td><td>${formatPrice(i.subtotal)}</td></tr>`).join('')}
+            </tbody>
+          </table>
+          <div style="text-align:right">
+            <div class="text-muted" style="font-size:.85rem">Subtotal: ${formatPrice(o.subtotal)}</div>
+            ${o.delivery_fee ? `<div class="text-muted" style="font-size:.85rem">Delivery: ${formatPrice(o.delivery_fee)}</div>` : ''}
+            ${o.discount ? `<div class="text-muted" style="font-size:.85rem">Discount: -${formatPrice(o.discount)}</div>` : ''}
+            <div style="font-size:1.2rem;font-weight:800;color:var(--primary)">Total: ${formatPrice(o.total)}</div>
+          </div>
+        `;
+      } catch(err) {
+        body.innerHTML = `<div class="alert alert-error">${err.message}</div>`;
+      }
+    }
+
+    loadAdminOrders();
+    setInterval(loadAdminOrders, 30000);
+  </script>
+</body>
+</html>

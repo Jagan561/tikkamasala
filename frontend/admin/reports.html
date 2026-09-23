@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reports — Admin | Tikka Masala Chat Corner</title>
+  <meta name="description" content="Tabular sales and product reports for the Tikka Masala Chat Corner admin panel.">
+  <link rel="stylesheet" href="../css/main.css">
+  <link rel="stylesheet" href="../css/admin.css">
+</head>
+<body class="admin-body">
+
+  <div class="admin-layout">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-brand">
+        <a href="dashboard.html" class="sidebar-logo">
+          <div class="sidebar-logo-icon">🍛</div>
+          <div><div class="sidebar-logo-text">Tikka Masala</div><div class="sidebar-logo-sub">Admin Panel</div></div>
+        </a>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="sidebar-section-label">Main</div>
+        <a href="dashboard.html" class="sidebar-link"><span class="link-icon">📊</span> Dashboard</a>
+        <a href="orders.html" class="sidebar-link"><span class="link-icon">🛍️</span> Orders</a>
+        <div class="sidebar-section-label">Catalog</div>
+        <a href="products.html" class="sidebar-link"><span class="link-icon">🍽️</span> Products</a>
+        <a href="categories.html" class="sidebar-link"><span class="link-icon">🏷️</span> Categories</a>
+        <a href="inventory.html" class="sidebar-link"><span class="link-icon">📦</span> Inventory</a>
+        <div class="sidebar-section-label">Analytics</div>
+        <a href="sales.html" class="sidebar-link"><span class="link-icon">📈</span> Sales Charts</a>
+        <a href="reports.html" class="sidebar-link active"><span class="link-icon">📋</span> Reports</a>
+        <a href="customers.html" class="sidebar-link"><span class="link-icon">👥</span> Customers</a>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="sidebar-user">
+          <div class="sidebar-avatar">👤</div>
+          <div><div class="sidebar-username admin-username">Admin</div><div class="sidebar-role">Administrator</div></div>
+          <button class="btn btn-ghost btn-sm admin-logout" style="margin-left:auto;color:rgba(255,255,255,.6);font-size:1.2rem">⏏</button>
+        </div>
+      </div>
+    </aside>
+
+    <div class="admin-content">
+      <header class="admin-header">
+        <div style="display:flex;align-items:center;gap:1rem">
+          <button class="sidebar-toggle" id="sidebar-toggle">☰</button>
+          <div class="admin-page-title">📋 Reports</div>
+        </div>
+        <div class="admin-header-right">
+          <select id="report-period" class="form-control" style="width:150px" onchange="loadAllReports()">
+            <option value="7">Last 7 days</option>
+            <option value="30" selected>Last 30 days</option>
+            <option value="90">Last 90 days</option>
+          </select>
+          <button class="btn btn-outline btn-sm" onclick="printReport()">🖨️ Print</button>
+        </div>
+      </header>
+
+      <main class="admin-main" id="printable-area">
+        <!-- Report Tabs -->
+        <div style="display:flex;gap:.5rem;margin-bottom:1.5rem;background:#fff;padding:.5rem;border-radius:var(--radius-md);box-shadow:0 1px 4px rgba(0,0,0,.06)">
+          <button class="btn btn-primary btn-sm report-tab active" data-tab="daily" onclick="switchTab('daily')">📅 Daily Sales</button>
+          <button class="btn btn-ghost btn-sm report-tab" data-tab="products" onclick="switchTab('products')">🍽️ Top Products</button>
+          <button class="btn btn-ghost btn-sm report-tab" data-tab="orders" onclick="switchTab('orders')">🛍️ Order Summary</button>
+        </div>
+
+        <!-- Daily Sales Report -->
+        <div id="tab-daily" class="report-section">
+          <div class="admin-section">
+            <div class="admin-section-header">
+              <div class="admin-section-title">📅 Daily Sales Report</div>
+              <div class="text-muted" style="font-size:.82rem">Revenue & orders per day</div>
+            </div>
+            <div class="table-wrapper">
+              <table class="table" id="daily-report-table">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Orders</th>
+                    <th>Revenue (₹)</th>
+                    <th>Avg Order Value</th>
+                    <th>Bar</th>
+                  </tr>
+                </thead>
+                <tbody id="daily-report-body">
+                  <tr><td colspan="5" class="text-center text-muted" style="padding:2rem">Loading...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Top Products Report -->
+        <div id="tab-products" class="report-section hidden">
+          <div class="admin-section">
+            <div class="admin-section-header">
+              <div class="admin-section-title">🍽️ Top Selling Products</div>
+              <div class="text-muted" style="font-size:.82rem">By quantity sold in the period</div>
+            </div>
+            <div class="table-wrapper">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Rank</th>
+                    <th>Product</th>
+                    <th>Category</th>
+                    <th>Units Sold</th>
+                    <th>Revenue (₹)</th>
+                    <th>Avg Price</th>
+                  </tr>
+                </thead>
+                <tbody id="products-report-body">
+                  <tr><td colspan="6" class="text-center text-muted" style="padding:2rem">Loading...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Order Summary Report -->
+        <div id="tab-orders" class="report-section hidden">
+          <div class="admin-section">
+            <div class="admin-section-header">
+              <div class="admin-section-title">🛍️ Order Status Summary</div>
+              <div class="text-muted" style="font-size:.82rem">Breakdown of orders by status and type</div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem" class="admin-section-body">
+              <div>
+                <h4 style="margin-bottom:1rem;font-size:.95rem">By Status</h4>
+                <div class="table-wrapper">
+                  <table class="table">
+                    <thead><tr><th>Status</th><th>Count</th><th>Revenue (₹)</th></tr></thead>
+                    <tbody id="status-report-body">
+                      <tr><td colspan="3" class="text-center text-muted">Loading...</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              <div>
+                <h4 style="margin-bottom:1rem;font-size:.95rem">By Order Type</h4>
+                <div class="table-wrapper">
+                  <table class="table">
+                    <thead><tr><th>Type</th><th>Count</th><th>Revenue (₹)</th></tr></thead>
+                    <tbody id="type-report-body">
+                      <tr><td colspan="3" class="text-center text-muted">Loading...</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <div id="toast-container"></div>
+
+  <style>
+    .report-tab.active { background: linear-gradient(135deg,var(--primary),var(--primary-dark)); color:#fff; }
+    @media print {
+      .sidebar, .admin-header, .admin-header-right, .report-tab { display: none !important; }
+      .admin-content { margin-left: 0 !important; }
+    }
+  </style>
+
+  <script src="../js/api.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/admin.js"></script>
+  <script>
+    requireAdminAuth();
+    initAdminNav();
+
+    let currentTab = 'daily';
+
+    function switchTab(tab) {
+      currentTab = tab;
+      document.querySelectorAll('.report-section').forEach(s => s.classList.add('hidden'));
+      document.getElementById(`tab-${tab}`).classList.remove('hidden');
+      document.querySelectorAll('.report-tab').forEach(t => {
+        t.classList.toggle('active', t.dataset.tab === tab);
+        if (!t.classList.contains('active')) { t.classList.remove('btn-primary'); t.classList.add('btn-ghost'); }
+        else { t.classList.add('btn-primary'); t.classList.remove('btn-ghost'); }
+      });
+    }
+
+    async function loadAllReports() {
+      const days = document.getElementById('report-period').value;
+      await Promise.all([loadDailyReport(days), loadProductsReport(), loadOrderSummary()]);
+    }
+
+    async function loadDailyReport(days) {
+      const tbody = document.getElementById('daily-report-body');
+      try {
+        const data = await api.get(`/api/admin/sales/daily?days=${days}`);
+        if (!data.length) { tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">No sales data in this period.</td></tr>'; return; }
+        const maxRev = Math.max(...data.map(d => d.revenue));
+        tbody.innerHTML = data.map(d => {
+          const pct = maxRev ? Math.round((d.revenue / maxRev) * 100) : 0;
+          const avg = d.orders ? (d.revenue / d.orders).toFixed(2) : 0;
+          return `<tr>
+            <td><strong>${d.date}</strong></td>
+            <td>${d.orders}</td>
+            <td><strong class="price">₹${Number(d.revenue).toLocaleString('en-IN')}</strong></td>
+            <td>₹${Number(avg).toLocaleString('en-IN')}</td>
+            <td style="min-width:120px">
+              <div style="background:#F0F2F5;border-radius:99px;height:8px;overflow:hidden">
+                <div style="width:${pct}%;height:100%;background:var(--primary);border-radius:99px"></div>
+              </div>
+            </td>
+          </tr>`;
+        }).join('');
+      } catch(err) {
+        tbody.innerHTML = `<tr><td colspan="5"><div class="alert alert-error">${err.message}</div></td></tr>`;
+      }
+    }
+
+    async function loadProductsReport() {
+      const tbody = document.getElementById('products-report-body');
+      try {
+        const data = await api.get('/api/admin/sales/by-product');
+        if (!data.length) { tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">No sales data yet.</td></tr>'; return; }
+        const medals = ['🥇','🥈','🥉'];
+        tbody.innerHTML = data.map((p, i) => `
+          <tr>
+            <td><strong>${medals[i] || (i + 1)}</strong></td>
+            <td><strong>${p.product_name}</strong></td>
+            <td>${p.category_name || '—'}</td>
+            <td><span class="badge badge-primary">${p.total_quantity}</span></td>
+            <td><strong class="price">₹${Number(p.total_revenue).toLocaleString('en-IN')}</strong></td>
+            <td>₹${p.total_quantity ? (p.total_revenue / p.total_quantity).toFixed(2) : '—'}</td>
+          </tr>
+        `).join('');
+      } catch(err) {
+        tbody.innerHTML = `<tr><td colspan="6"><div class="alert alert-error">${err.message}</div></td></tr>`;
+      }
+    }
+
+    async function loadOrderSummary() {
+      try {
+        const summary = await api.get('/api/admin/sales/summary');
+        const statusMap = summary.by_status || {};
+        const typeMap = summary.by_type || {};
+        const statusColors = { DELIVERED:'badge-success', CANCELLED:'badge-error', PREPARING:'badge-warning', READY:'badge-warning', NEW:'badge-info', ACCEPTED:'badge-success', OUT_FOR_DELIVERY:'badge-primary' };
+
+        document.getElementById('status-report-body').innerHTML = Object.entries(statusMap).map(([s, v]) => `
+          <tr>
+            <td><span class="badge ${statusColors[s]||'badge-secondary'}">${s.replace(/_/g,' ')}</span></td>
+            <td><strong>${v.count || v}</strong></td>
+            <td>${v.revenue ? formatPrice(v.revenue) : '—'}</td>
+          </tr>
+        `).join('') || '<tr><td colspan="3" class="text-muted">No data</td></tr>';
+
+        document.getElementById('type-report-body').innerHTML = Object.entries(typeMap).map(([t, v]) => `
+          <tr>
+            <td><span class="badge badge-secondary">${t}</span></td>
+            <td><strong>${v.count || v}</strong></td>
+            <td>${v.revenue ? formatPrice(v.revenue) : '—'}</td>
+          </tr>
+        `).join('') || '<tr><td colspan="3" class="text-muted">No data</td></tr>';
+      } catch(err) {
+        document.getElementById('status-report-body').innerHTML = `<tr><td colspan="3"><div class="alert alert-error">${err.message}</div></td></tr>`;
+      }
+    }
+
+    function printReport() { window.print(); }
+
+    loadAllReports();
+  </script>
+</body>
+</html>

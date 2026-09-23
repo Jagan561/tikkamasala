@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Customers — Admin | Tikka Masala Chat Corner</title>
+  <meta name="description" content="View registered customer list for Tikka Masala Chat Corner.">
+  <link rel="stylesheet" href="../css/main.css">
+  <link rel="stylesheet" href="../css/admin.css">
+</head>
+<body class="admin-body">
+
+  <div class="admin-layout">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-brand">
+        <a href="dashboard.html" class="sidebar-logo">
+          <div class="sidebar-logo-icon">🍛</div>
+          <div><div class="sidebar-logo-text">Tikka Masala</div><div class="sidebar-logo-sub">Admin Panel</div></div>
+        </a>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="sidebar-section-label">Main</div>
+        <a href="dashboard.html" class="sidebar-link"><span class="link-icon">📊</span> Dashboard</a>
+        <a href="orders.html" class="sidebar-link"><span class="link-icon">🛍️</span> Orders</a>
+        <div class="sidebar-section-label">Catalog</div>
+        <a href="products.html" class="sidebar-link"><span class="link-icon">🍽️</span> Products</a>
+        <a href="categories.html" class="sidebar-link"><span class="link-icon">🏷️</span> Categories</a>
+        <a href="inventory.html" class="sidebar-link"><span class="link-icon">📦</span> Inventory</a>
+        <div class="sidebar-section-label">Analytics</div>
+        <a href="sales.html" class="sidebar-link"><span class="link-icon">📈</span> Sales Charts</a>
+        <a href="reports.html" class="sidebar-link"><span class="link-icon">📋</span> Reports</a>
+        <a href="customers.html" class="sidebar-link active"><span class="link-icon">👥</span> Customers</a>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="sidebar-user">
+          <div class="sidebar-avatar">👤</div>
+          <div><div class="sidebar-username admin-username">Admin</div><div class="sidebar-role">Administrator</div></div>
+          <button class="btn btn-ghost btn-sm admin-logout" style="margin-left:auto;color:rgba(255,255,255,.6);font-size:1.2rem">⏏</button>
+        </div>
+      </div>
+    </aside>
+
+    <div class="admin-content">
+      <header class="admin-header">
+        <div style="display:flex;align-items:center;gap:1rem">
+          <button class="sidebar-toggle" id="sidebar-toggle">☰</button>
+          <div class="admin-page-title">👥 Customers</div>
+        </div>
+        <div class="admin-header-right">
+          <input type="text" id="cust-search" class="form-control" style="width:240px" placeholder="🔍 Search name or mobile..." oninput="filterCustomers()">
+        </div>
+      </header>
+
+      <main class="admin-main">
+        <!-- Summary cards -->
+        <div class="stats-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:1.5rem">
+          <div class="stat-card">
+            <div class="stat-icon">👥</div>
+            <div class="stat-info">
+              <div class="stat-label">Total Customers</div>
+              <div class="stat-value" id="total-customers">—</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">✅</div>
+            <div class="stat-info">
+              <div class="stat-label">Verified</div>
+              <div class="stat-value" id="verified-customers">—</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">📅</div>
+            <div class="stat-info">
+              <div class="stat-label">New This Month</div>
+              <div class="stat-value" id="new-this-month">—</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="admin-section">
+          <div class="admin-section-header">
+            <div class="admin-section-title">Customer List</div>
+            <div class="text-muted" style="font-size:.82rem" id="cust-count"></div>
+          </div>
+          <div class="table-wrapper">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Name</th>
+                  <th>Mobile</th>
+                  <th>Verified</th>
+                  <th>Total Orders</th>
+                  <th>Total Spent</th>
+                  <th>Joined</th>
+                </tr>
+              </thead>
+              <tbody id="customers-body">
+                <tr><td colspan="7" class="text-center text-muted" style="padding:3rem">Loading customers...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <div id="toast-container"></div>
+
+  <script src="../js/api.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/admin.js"></script>
+  <script>
+    requireAdminAuth();
+    initAdminNav();
+
+    let allCustomers = [];
+
+    async function loadCustomers() {
+      const tbody = document.getElementById('customers-body');
+      try {
+        const data = await api.get('/api/admin/customers');
+        allCustomers = data;
+
+        document.getElementById('total-customers').textContent = data.length;
+        document.getElementById('verified-customers').textContent = data.filter(c => c.is_verified).length;
+
+        const now = new Date();
+        const thisMonth = data.filter(c => {
+          const d = new Date(c.created_at);
+          return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+        }).length;
+        document.getElementById('new-this-month').textContent = thisMonth;
+        document.getElementById('cust-count').textContent = `${data.length} customers`;
+
+        renderCustomers(data);
+      } catch(err) {
+        tbody.innerHTML = `<tr><td colspan="7"><div class="alert alert-error">${err.message}</div></td></tr>`;
+      }
+    }
+
+    function renderCustomers(customers) {
+      const tbody = document.getElementById('customers-body');
+      if (!customers.length) {
+        tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">👥</div><h3>No customers found</h3></div></td></tr>';
+        return;
+      }
+      tbody.innerHTML = customers.map((c, i) => `
+        <tr>
+          <td>${i + 1}</td>
+          <td>
+            <div style="display:flex;align-items:center;gap:.75rem">
+              <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--secondary));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:.9rem;flex-shrink:0">
+                ${(c.name || '?')[0].toUpperCase()}
+              </div>
+              <strong>${c.name || '—'}</strong>
+            </div>
+          </td>
+          <td>📱 ${c.mobile}</td>
+          <td>${c.is_verified ? '<span class="badge badge-success">✅ Verified</span>' : '<span class="badge badge-warning">Unverified</span>'}</td>
+          <td><strong>${c.total_orders || 0}</strong></td>
+          <td>${c.total_spent ? formatPrice(c.total_spent) : '—'}</td>
+          <td>${c.created_at ? new Date(c.created_at).toLocaleDateString('en-IN', {day:'numeric',month:'short',year:'numeric'}) : '—'}</td>
+        </tr>
+      `).join('');
+    }
+
+    function filterCustomers() {
+      const q = document.getElementById('cust-search').value.toLowerCase();
+      const filtered = allCustomers.filter(c =>
+        (c.name||'').toLowerCase().includes(q) || c.mobile.includes(q)
+      );
+      renderCustomers(filtered);
+    }
+
+    loadCustomers();
+  </script>
+</body>
+</html>

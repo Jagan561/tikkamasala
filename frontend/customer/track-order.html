@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Track Order — Tikka Masala Chat Corner</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/customer.css">
+</head>
+<body>
+<nav class="navbar">
+  <a href="/customer/home.html" class="navbar-brand">
+    <div class="navbar-logo">🫙</div>
+    <div class="navbar-brand-text"><span class="brand-name">Tikka Masala</span><span class="brand-tagline">Chat Corner</span></div>
+  </a>
+  <ul class="navbar-nav">
+    <li><a href="/customer/my-orders.html" class="nav-link">← My Orders</a></li>
+    <li><button class="btn btn-outline btn-sm" style="color:#fff;border-color:rgba(255,255,255,.4)" onclick="logout()">Logout</button></li>
+  </ul>
+</nav>
+
+<div class="container" style="max-width:700px;padding-top:2rem;padding-bottom:4rem">
+  <div id="ws-banner" class="status-banner hidden">
+    🔴 Connecting to live updates...
+  </div>
+
+  <div id="order-header" class="card mb-2">
+    <div class="card-body">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem">
+        <div>
+          <p class="text-muted" style="font-size:.8rem">ORDER NUMBER</p>
+          <h2 id="order-number-display" style="color:var(--primary)">Loading...</h2>
+        </div>
+        <span id="status-badge" class="badge" style="font-size:.9rem;padding:.6rem 1.2rem">—</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Live status message -->
+  <div id="status-message" class="alert alert-info hidden" style="margin-bottom:1rem"></div>
+
+  <!-- Timeline -->
+  <div class="card mb-2">
+    <div class="card-body">
+      <h3 style="margin-bottom:.5rem">Order Progress</h3>
+      <div id="timeline-container">
+        <p class="text-muted">Loading timeline...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Order items -->
+  <div class="card mb-2">
+    <div class="card-body">
+      <h3 style="margin-bottom:.75rem">Order Items</h3>
+      <div id="order-items"></div>
+      <div id="order-totals" style="margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border)"></div>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+<script src="/js/api.js"></script>
+<script src="/js/auth.js"></script>
+<script src="/js/orders.js"></script>
+<script src="/js/websocket.js"></script>
+<script>
+  requireCustomerAuth();
+  const params = new URLSearchParams(location.search);
+  const orderId = parseInt(params.get('order_id'));
+  if (!orderId) { window.location.href = '/customer/my-orders.html'; }
+
+  async function fetchAndRender() {
+    const order = await loadOrderDetail(orderId);
+    if (!order) return;
+    document.getElementById('order-number-display').textContent = order.order_number;
+    document.getElementById('status-badge').className = `badge status-${order.status}`;
+    document.getElementById('status-badge').textContent = order.status.replace(/_/g, ' ');
+    document.getElementById('timeline-container').innerHTML = renderOrderTimeline(order.status, order.history);
+    document.getElementById('order-items').innerHTML = order.items.map(i =>
+      `<div style="display:flex;justify-content:space-between;padding:.4rem 0;font-size:.9rem">
+        <span>${i.product_name} × ${i.quantity}</span>
+        <span>${formatPrice(i.subtotal)}</span>
+      </div>`
+    ).join('');
+    document.getElementById('order-totals').innerHTML = `
+      <div style="display:flex;justify-content:space-between"><span>Subtotal</span><span>${formatPrice(order.subtotal)}</span></div>
+      <div style="display:flex;justify-content:space-between"><span>Delivery</span><span>${formatPrice(order.delivery_fee)}</span></div>
+      <div style="display:flex;justify-content:space-between;font-weight:800;font-size:1.1rem;margin-top:.5rem"><span>Total</span><span style="color:var(--primary)">${formatPrice(order.total)}</span></div>
+    `;
+  }
+
+  fetchAndRender();
+
+  // WebSocket for live updates
+  wsConnect();
+  const banner = document.getElementById('ws-banner');
+  banner.classList.remove('hidden');
+  banner.innerHTML = '🟢 Connected — watching for live updates';
+
+  document.addEventListener('ws:ORDER_STATUS_CHANGED', e => {
+    const data = e.detail;
+    if (data.order_id !== orderId) return;
+    showToast(data.message || `Status updated: ${data.status}`, 'success', 6000);
+    const msgEl = document.getElementById('status-message');
+    msgEl.className = 'alert alert-success';
+    msgEl.textContent = data.message || `Order status: ${data.status}`;
+    msgEl.classList.remove('hidden');
+    fetchAndRender();
+  });
+</script>
+</body>
+</html>

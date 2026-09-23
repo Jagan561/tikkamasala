@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Categories — Admin | Tikka Masala Chat Corner</title>
+  <meta name="description" content="Manage product categories for the Tikka Masala Chat Corner menu.">
+  <link rel="stylesheet" href="../css/main.css">
+  <link rel="stylesheet" href="../css/admin.css">
+</head>
+<body class="admin-body">
+
+  <div class="admin-layout">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-brand">
+        <a href="dashboard.html" class="sidebar-logo">
+          <div class="sidebar-logo-icon">🍛</div>
+          <div><div class="sidebar-logo-text">Tikka Masala</div><div class="sidebar-logo-sub">Admin Panel</div></div>
+        </a>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="sidebar-section-label">Main</div>
+        <a href="dashboard.html" class="sidebar-link"><span class="link-icon">📊</span> Dashboard</a>
+        <a href="orders.html" class="sidebar-link"><span class="link-icon">🛍️</span> Orders</a>
+        <div class="sidebar-section-label">Catalog</div>
+        <a href="products.html" class="sidebar-link"><span class="link-icon">🍽️</span> Products</a>
+        <a href="categories.html" class="sidebar-link active"><span class="link-icon">🏷️</span> Categories</a>
+        <a href="inventory.html" class="sidebar-link"><span class="link-icon">📦</span> Inventory</a>
+        <div class="sidebar-section-label">Analytics</div>
+        <a href="sales.html" class="sidebar-link"><span class="link-icon">📈</span> Sales Charts</a>
+        <a href="reports.html" class="sidebar-link"><span class="link-icon">📋</span> Reports</a>
+        <a href="customers.html" class="sidebar-link"><span class="link-icon">👥</span> Customers</a>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="sidebar-user">
+          <div class="sidebar-avatar">👤</div>
+          <div><div class="sidebar-username admin-username">Admin</div><div class="sidebar-role">Administrator</div></div>
+          <button class="btn btn-ghost btn-sm admin-logout" style="margin-left:auto;color:rgba(255,255,255,.6);font-size:1.2rem">⏏</button>
+        </div>
+      </div>
+    </aside>
+
+    <div class="admin-content">
+      <header class="admin-header">
+        <div style="display:flex;align-items:center;gap:1rem">
+          <button class="sidebar-toggle" id="sidebar-toggle">☰</button>
+          <div class="admin-page-title">🏷️ Categories</div>
+        </div>
+        <div class="admin-header-right">
+          <button class="btn btn-primary btn-sm" onclick="openCatModal()">+ Add Category</button>
+        </div>
+      </header>
+
+      <main class="admin-main">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;align-items:start">
+
+          <!-- Categories Table -->
+          <div class="admin-section" style="grid-column:1/-1">
+            <div class="admin-section-header">
+              <div class="admin-section-title">All Categories</div>
+              <div class="text-muted" style="font-size:.82rem" id="cat-count"></div>
+            </div>
+            <div class="table-wrapper">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Status</th>
+                    <th>Products</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="categories-body">
+                  <tr><td colspan="6" class="text-center text-muted" style="padding:3rem">Loading...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Category Modal -->
+  <div class="modal-overlay hidden" id="cat-modal">
+    <div class="modal" style="max-width:440px">
+      <div class="modal-header">
+        <div class="modal-title" id="cat-modal-title">Add Category</div>
+        <button class="modal-close" onclick="closeCatModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <form id="cat-form" class="admin-form" onsubmit="saveCategory(event)" novalidate>
+          <input type="hidden" id="cat-id">
+          <div class="form-group">
+            <label class="form-label" for="cat-name">Category Name *</label>
+            <input type="text" id="cat-name" class="form-control" placeholder="e.g. Chaat, Snacks, Beverages" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="cat-desc">Description</label>
+            <textarea id="cat-desc" class="form-control" rows="2" placeholder="Brief description..."></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="cat-icon">Icon / Emoji</label>
+            <input type="text" id="cat-icon" class="form-control" placeholder="e.g. 🍛" maxlength="4">
+          </div>
+          <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer;font-size:.9rem;font-weight:500">
+            <input type="checkbox" id="cat-active" checked style="width:16px;height:16px;accent-color:var(--primary)">
+            Active (visible on menu)
+          </label>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeCatModal()">Cancel</button>
+        <button id="save-cat-btn" class="btn btn-primary" onclick="saveCategory(event)">Save Category</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast-container"></div>
+
+  <script src="../js/api.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/admin.js"></script>
+  <script>
+    requireAdminAuth();
+    initAdminNav();
+
+    let allCategories = [];
+
+    async function loadCategories() {
+      const tbody = document.getElementById('categories-body');
+      try {
+        const [cats, products] = await Promise.all([
+          api.get('/api/categories'),
+          api.get('/api/products')
+        ]);
+        allCategories = cats;
+        document.getElementById('cat-count').textContent = `${cats.length} categories`;
+
+        // Count products per category
+        const prodCount = {};
+        products.forEach(p => { prodCount[p.category_id] = (prodCount[p.category_id] || 0) + 1; });
+
+        if (!cats.length) {
+          tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state"><div class="empty-icon">🏷️</div><h3>No categories yet</h3></div></td></tr>';
+          return;
+        }
+        tbody.innerHTML = cats.map((c, i) => `
+          <tr>
+            <td>${i + 1}</td>
+            <td>
+              <strong style="font-size:1rem">${c.icon || '🍽️'} ${c.name}</strong>
+            </td>
+            <td style="color:var(--text-muted);font-size:.88rem">${c.description || '—'}</td>
+            <td><span class="badge badge-${c.is_active ? 'success' : 'error'}">${c.is_active ? 'Active' : 'Inactive'}</span></td>
+            <td><strong>${prodCount[c.id] || 0}</strong> items</td>
+            <td>
+              <div class="actions">
+                <button class="btn btn-outline btn-sm" onclick="editCategory(${c.id})">Edit</button>
+                <button class="btn btn-ghost btn-sm" style="color:var(--error)" onclick="deleteCategory(${c.id},'${c.name}')">Delete</button>
+              </div>
+            </td>
+          </tr>
+        `).join('');
+      } catch(err) {
+        tbody.innerHTML = `<tr><td colspan="6"><div class="alert alert-error">${err.message}</div></td></tr>`;
+      }
+    }
+
+    function openCatModal(cat = null) {
+      document.getElementById('cat-modal').classList.remove('hidden');
+      document.getElementById('cat-form').reset();
+      if (cat) {
+        document.getElementById('cat-modal-title').textContent = 'Edit Category';
+        document.getElementById('cat-id').value = cat.id;
+        document.getElementById('cat-name').value = cat.name;
+        document.getElementById('cat-desc').value = cat.description || '';
+        document.getElementById('cat-icon').value = cat.icon || '';
+        document.getElementById('cat-active').checked = cat.is_active;
+      } else {
+        document.getElementById('cat-modal-title').textContent = 'Add Category';
+        document.getElementById('cat-id').value = '';
+        document.getElementById('cat-active').checked = true;
+      }
+    }
+
+    function closeCatModal() {
+      document.getElementById('cat-modal').classList.add('hidden');
+    }
+
+    function editCategory(id) {
+      const cat = allCategories.find(c => c.id === id);
+      if (cat) openCatModal(cat);
+    }
+
+    async function saveCategory(event) {
+      event.preventDefault();
+      const id = document.getElementById('cat-id').value;
+      const payload = {
+        name: document.getElementById('cat-name').value.trim(),
+        description: document.getElementById('cat-desc').value.trim(),
+        icon: document.getElementById('cat-icon').value.trim(),
+        is_active: document.getElementById('cat-active').checked,
+      };
+      if (!payload.name) { showToast('Category name is required.', 'warning'); return; }
+      const btn = document.getElementById('save-cat-btn');
+      setLoading(btn, true, 'Saving...');
+      try {
+        if (id) {
+          await api.put(`/api/admin/categories/${id}`, payload);
+          showToast('Category updated.', 'success');
+        } else {
+          await api.post('/api/admin/categories', payload);
+          showToast('Category created.', 'success');
+        }
+        closeCatModal();
+        loadCategories();
+      } catch(err) {
+        showToast(err.message, 'error');
+      } finally {
+        setLoading(btn, false, 'Save Category');
+      }
+    }
+
+    async function deleteCategory(id, name) {
+      if (!confirm(`Delete category "${name}"? This may affect products in this category.`)) return;
+      try {
+        await api.del(`/api/admin/categories/${id}`);
+        showToast('Category deleted.', 'success');
+        loadCategories();
+      } catch(err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    loadCategories();
+  </script>
+</body>
+</html>

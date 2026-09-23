@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sales Charts — Admin | Tikka Masala Chat Corner</title>
+  <meta name="description" content="Visual sales analytics with daily and monthly charts for Tikka Masala Chat Corner.">
+  <link rel="stylesheet" href="../css/main.css">
+  <link rel="stylesheet" href="../css/admin.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body class="admin-body">
+
+  <div class="admin-layout">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-brand">
+        <a href="dashboard.html" class="sidebar-logo">
+          <div class="sidebar-logo-icon">🍛</div>
+          <div><div class="sidebar-logo-text">Tikka Masala</div><div class="sidebar-logo-sub">Admin Panel</div></div>
+        </a>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="sidebar-section-label">Main</div>
+        <a href="dashboard.html" class="sidebar-link"><span class="link-icon">📊</span> Dashboard</a>
+        <a href="orders.html" class="sidebar-link"><span class="link-icon">🛍️</span> Orders</a>
+        <div class="sidebar-section-label">Catalog</div>
+        <a href="products.html" class="sidebar-link"><span class="link-icon">🍽️</span> Products</a>
+        <a href="categories.html" class="sidebar-link"><span class="link-icon">🏷️</span> Categories</a>
+        <a href="inventory.html" class="sidebar-link"><span class="link-icon">📦</span> Inventory</a>
+        <div class="sidebar-section-label">Analytics</div>
+        <a href="sales.html" class="sidebar-link active"><span class="link-icon">📈</span> Sales Charts</a>
+        <a href="reports.html" class="sidebar-link"><span class="link-icon">📋</span> Reports</a>
+        <a href="customers.html" class="sidebar-link"><span class="link-icon">👥</span> Customers</a>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="sidebar-user">
+          <div class="sidebar-avatar">👤</div>
+          <div><div class="sidebar-username admin-username">Admin</div><div class="sidebar-role">Administrator</div></div>
+          <button class="btn btn-ghost btn-sm admin-logout" style="margin-left:auto;color:rgba(255,255,255,.6);font-size:1.2rem">⏏</button>
+        </div>
+      </div>
+    </aside>
+
+    <div class="admin-content">
+      <header class="admin-header">
+        <div style="display:flex;align-items:center;gap:1rem">
+          <button class="sidebar-toggle" id="sidebar-toggle">☰</button>
+          <div class="admin-page-title">📈 Sales Analytics</div>
+        </div>
+        <div class="admin-header-right">
+          <button class="btn btn-primary btn-sm" onclick="loadSalesCharts()">🔄 Refresh</button>
+        </div>
+      </header>
+
+      <main class="admin-main">
+        <!-- Summary Cards -->
+        <div class="stats-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:1.5rem">
+          <div class="stat-card">
+            <div class="stat-icon">🛍️</div>
+            <div class="stat-info">
+              <div class="stat-label">Today's Orders</div>
+              <div class="stat-value" id="today-orders">—</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">💰</div>
+            <div class="stat-info">
+              <div class="stat-label">Today's Revenue</div>
+              <div class="stat-value" id="today-revenue">—</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">📅</div>
+            <div class="stat-info">
+              <div class="stat-label">This Month Orders</div>
+              <div class="stat-value" id="month-orders">—</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">💎</div>
+            <div class="stat-info">
+              <div class="stat-label">This Month Revenue</div>
+              <div class="stat-value" id="month-revenue">—</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:1.5rem">
+          <!-- Daily Chart -->
+          <div class="admin-section">
+            <div class="admin-section-header">
+              <div class="admin-section-title">📊 Last 7 Days</div>
+              <select id="daily-days" class="form-control" style="width:110px" onchange="reloadDaily()">
+                <option value="7">7 days</option>
+                <option value="14">14 days</option>
+                <option value="30">30 days</option>
+              </select>
+            </div>
+            <div class="admin-section-body">
+              <div class="chart-container">
+                <canvas id="daily-chart"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- Monthly Chart -->
+          <div class="admin-section">
+            <div class="admin-section-header">
+              <div class="admin-section-title">📉 Monthly Revenue Trend</div>
+              <select id="monthly-months" class="form-control" style="width:110px" onchange="reloadMonthly()">
+                <option value="6">6 months</option>
+                <option value="12">12 months</option>
+              </select>
+            </div>
+            <div class="admin-section-body">
+              <div class="chart-container">
+                <canvas id="monthly-chart"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Order Type Donut -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem">
+          <div class="admin-section">
+            <div class="admin-section-header">
+              <div class="admin-section-title">🍕 Orders by Type</div>
+            </div>
+            <div class="admin-section-body" style="display:flex;align-items:center;justify-content:center">
+              <div style="height:240px;width:240px;position:relative">
+                <canvas id="type-chart"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <div class="admin-section">
+            <div class="admin-section-header">
+              <div class="admin-section-title">📊 Orders by Status</div>
+            </div>
+            <div class="admin-section-body" style="display:flex;align-items:center;justify-content:center">
+              <div style="height:240px;width:240px;position:relative">
+                <canvas id="status-chart"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <div id="toast-container"></div>
+
+  <script src="../js/api.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/admin.js"></script>
+  <script>
+    requireAdminAuth();
+    initAdminNav();
+
+    let dailyChart, monthlyChart, typeChart, statusChart;
+
+    function destroyChart(chart) { if (chart) chart.destroy(); }
+
+    async function loadSalesCharts() {
+      const days = document.getElementById('daily-days').value || 7;
+      const months = document.getElementById('monthly-months').value || 6;
+
+      try {
+        const [daily, monthly, summary] = await Promise.all([
+          api.get(`/api/admin/sales/daily?days=${days}`),
+          api.get(`/api/admin/sales/monthly?months=${months}`),
+          api.get('/api/admin/sales/summary'),
+        ]);
+
+        // Summary
+        document.getElementById('today-orders').textContent  = summary.today?.orders || 0;
+        document.getElementById('today-revenue').textContent = formatPrice(summary.today?.revenue || 0);
+        document.getElementById('month-orders').textContent  = summary.this_month?.orders || 0;
+        document.getElementById('month-revenue').textContent = formatPrice(summary.this_month?.revenue || 0);
+
+        // Daily Bar Chart
+        destroyChart(dailyChart);
+        const dCtx = document.getElementById('daily-chart').getContext('2d');
+        dailyChart = new Chart(dCtx, {
+          type: 'bar',
+          data: {
+            labels: daily.map(d => d.date),
+            datasets: [
+              { label: 'Revenue (₹)', data: daily.map(d => d.revenue), backgroundColor: 'rgba(200,16,46,.8)', borderRadius: 6, yAxisID: 'y' },
+              { label: 'Orders', data: daily.map(d => d.orders), backgroundColor: 'rgba(232,119,34,.8)', borderRadius: 6, yAxisID: 'y1' }
+            ]
+          },
+          options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { position: 'top' } },
+            scales: {
+              y:  { type: 'linear', display: true, position: 'left', grid: { color: 'rgba(0,0,0,.05)' } },
+              y1: { type: 'linear', display: true, position: 'right', grid: { drawOnChartArea: false } }
+            }
+          }
+        });
+
+        // Monthly Line Chart
+        destroyChart(monthlyChart);
+        const mCtx = document.getElementById('monthly-chart').getContext('2d');
+        monthlyChart = new Chart(mCtx, {
+          type: 'line',
+          data: {
+            labels: monthly.map(m => `${m.year}-${String(m.month).padStart(2,'0')}`),
+            datasets: [{
+              label: 'Revenue (₹)', data: monthly.map(m => m.revenue),
+              borderColor: '#C8102E', backgroundColor: 'rgba(200,16,46,.1)',
+              fill: true, tension: .4, pointRadius: 5, pointBackgroundColor: '#C8102E'
+            }]
+          },
+          options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top' } } }
+        });
+
+        // Order Type Donut
+        if (summary.by_type) {
+          destroyChart(typeChart);
+          const tCtx = document.getElementById('type-chart').getContext('2d');
+          typeChart = new Chart(tCtx, {
+            type: 'doughnut',
+            data: {
+              labels: Object.keys(summary.by_type),
+              datasets: [{ data: Object.values(summary.by_type), backgroundColor: ['rgba(200,16,46,.8)','rgba(232,119,34,.8)','rgba(245,197,24,.8)'] }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } }, cutout: '65%' }
+          });
+        }
+
+        // Order Status Donut
+        if (summary.by_status) {
+          destroyChart(statusChart);
+          const sCtx = document.getElementById('status-chart').getContext('2d');
+          const colors = { DELIVERED:'#2E7D32', CANCELLED:'#B71C1C', PREPARING:'#E65100', READY:'#F5C518', NEW:'#0277BD', ACCEPTED:'#1B5E20', OUT_FOR_DELIVERY:'#C8102E' };
+          statusChart = new Chart(sCtx, {
+            type: 'doughnut',
+            data: {
+              labels: Object.keys(summary.by_status),
+              datasets: [{ data: Object.values(summary.by_status), backgroundColor: Object.keys(summary.by_status).map(k => colors[k] || '#ccc') }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } }, cutout: '65%' }
+          });
+        }
+
+      } catch(err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    function reloadDaily() { loadSalesCharts(); }
+    function reloadMonthly() { loadSalesCharts(); }
+
+    loadSalesCharts();
+  </script>
+</body>
+</html>

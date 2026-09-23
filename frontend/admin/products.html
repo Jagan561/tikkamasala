@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Products — Admin | Tikka Masala Chat Corner</title>
+  <meta name="description" content="Manage menu products — add, edit, delete with image and stock controls.">
+  <link rel="stylesheet" href="../css/main.css">
+  <link rel="stylesheet" href="../css/admin.css">
+</head>
+<body class="admin-body">
+
+  <div class="admin-layout">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-brand">
+        <a href="dashboard.html" class="sidebar-logo">
+          <div class="sidebar-logo-icon">🍛</div>
+          <div><div class="sidebar-logo-text">Tikka Masala</div><div class="sidebar-logo-sub">Admin Panel</div></div>
+        </a>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="sidebar-section-label">Main</div>
+        <a href="dashboard.html" class="sidebar-link"><span class="link-icon">📊</span> Dashboard</a>
+        <a href="orders.html" class="sidebar-link"><span class="link-icon">🛍️</span> Orders</a>
+        <div class="sidebar-section-label">Catalog</div>
+        <a href="products.html" class="sidebar-link active"><span class="link-icon">🍽️</span> Products</a>
+        <a href="categories.html" class="sidebar-link"><span class="link-icon">🏷️</span> Categories</a>
+        <a href="inventory.html" class="sidebar-link"><span class="link-icon">📦</span> Inventory</a>
+        <div class="sidebar-section-label">Analytics</div>
+        <a href="sales.html" class="sidebar-link"><span class="link-icon">📈</span> Sales Charts</a>
+        <a href="reports.html" class="sidebar-link"><span class="link-icon">📋</span> Reports</a>
+        <a href="customers.html" class="sidebar-link"><span class="link-icon">👥</span> Customers</a>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="sidebar-user">
+          <div class="sidebar-avatar">👤</div>
+          <div><div class="sidebar-username admin-username">Admin</div><div class="sidebar-role">Administrator</div></div>
+          <button class="btn btn-ghost btn-sm admin-logout" style="margin-left:auto;color:rgba(255,255,255,.6);font-size:1.2rem">⏏</button>
+        </div>
+      </div>
+    </aside>
+
+    <div class="admin-content">
+      <header class="admin-header">
+        <div style="display:flex;align-items:center;gap:1rem">
+          <button class="sidebar-toggle" id="sidebar-toggle">☰</button>
+          <div class="admin-page-title">🍽️ Products</div>
+        </div>
+        <div class="admin-header-right">
+          <input type="text" id="product-search" class="form-control" style="width:200px" placeholder="🔍 Search products..." oninput="filterProducts()">
+          <button class="btn btn-primary btn-sm" onclick="openProductModal()">+ Add Product</button>
+        </div>
+      </header>
+
+      <main class="admin-main">
+        <div class="admin-section">
+          <div class="admin-section-header">
+            <div class="admin-section-title">All Products</div>
+            <div class="text-muted" style="font-size:.82rem" id="products-count"></div>
+          </div>
+          <div class="table-wrapper">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th style="width:60px">Image</th>
+                  <th>Name</th>
+                  <th>Category</th>
+                  <th>Price</th>
+                  <th>Stock</th>
+                  <th>Featured</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="admin-products-body">
+                <tr><td colspan="8" class="text-center text-muted" style="padding:3rem">Loading products...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Product Modal -->
+  <div class="modal-overlay hidden" id="product-modal">
+    <div class="modal" style="max-width:560px">
+      <div class="modal-header">
+        <div class="modal-title" id="product-modal-title">Add Product</div>
+        <button class="modal-close" onclick="closeProductModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <form id="product-form" class="admin-form" onsubmit="saveProduct(event)" novalidate>
+          <input type="hidden" id="product-id">
+
+          <div class="grid-2" style="gap:1rem">
+            <div class="form-group">
+              <label class="form-label" for="p-name">Product Name *</label>
+              <input type="text" id="p-name" class="form-control" placeholder="e.g. Pani Puri" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="p-cat">Category *</label>
+              <select id="p-cat" class="form-control">
+                <option value="">Select Category</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="p-desc">Description</label>
+            <textarea id="p-desc" class="form-control" rows="2" placeholder="Short description of the dish..."></textarea>
+          </div>
+
+          <div class="grid-2" style="gap:1rem">
+            <div class="form-group">
+              <label class="form-label" for="p-price">Price (₹) *</label>
+              <input type="number" id="p-price" class="form-control" placeholder="0.00" min="0" step="0.01" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="p-stock">Stock Quantity</label>
+              <input type="number" id="p-stock" class="form-control" placeholder="100" min="0" value="100">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="p-img">Image URL</label>
+            <input type="url" id="p-img" class="form-control" placeholder="https://...">
+            <div class="form-hint">Paste an image URL or leave blank for placeholder.</div>
+          </div>
+
+          <!-- Image Preview -->
+          <div id="img-preview-wrapper" style="margin-bottom:1rem;display:none">
+            <img id="img-preview" src="" alt="Preview" style="width:100%;height:160px;object-fit:cover;border-radius:var(--radius-md)">
+          </div>
+
+          <div style="display:flex;gap:2rem">
+            <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer;font-size:.9rem;font-weight:500">
+              <input type="checkbox" id="p-available" checked style="width:16px;height:16px;accent-color:var(--primary)">
+              Available
+            </label>
+            <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer;font-size:.9rem;font-weight:500">
+              <input type="checkbox" id="p-featured" style="width:16px;height:16px;accent-color:var(--accent)">
+              Featured
+            </label>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeProductModal()">Cancel</button>
+        <button id="save-product-btn" class="btn btn-primary" onclick="saveProduct(event)">Save Product</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast-container"></div>
+
+  <script src="../js/api.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/admin.js"></script>
+  <script>
+    requireAdminAuth();
+    initAdminNav();
+
+    let allProducts = [];
+
+    async function loadAdminProducts() {
+      const container = document.getElementById('admin-products-body');
+      try {
+        const [products, categories] = await Promise.all([
+          api.get('/api/products'),
+          api.get('/api/categories')
+        ]);
+        allProducts = products;
+
+        // Populate category select
+        const catSel = document.getElementById('p-cat');
+        catSel.innerHTML = '<option value="">Select Category</option>' +
+          categories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+
+        const catMap = {};
+        categories.forEach(c => catMap[c.id] = c.name);
+
+        document.getElementById('products-count').textContent = `${products.length} products`;
+        renderProducts(products, catMap);
+        window._catMap = catMap;
+      } catch (err) {
+        container.innerHTML = `<tr><td colspan="8"><div class="alert alert-error">${err.message}</div></td></tr>`;
+      }
+    }
+
+    function renderProducts(products, catMap = window._catMap || {}) {
+      const container = document.getElementById('admin-products-body');
+      if (!products.length) {
+        container.innerHTML = '<tr><td colspan="8"><div class="empty-state"><div class="empty-icon">🍽️</div><h3>No products yet</h3><p>Click "+ Add Product" to get started.</p></div></td></tr>';
+        return;
+      }
+      container.innerHTML = products.map(p => `
+        <tr>
+          <td>
+            <img src="${p.image_url || 'https://picsum.photos/seed/' + p.id + '/48/48'}"
+              style="width:48px;height:48px;object-fit:cover;border-radius:var(--radius-sm);background:var(--bg)"
+              onerror="this.src='https://picsum.photos/seed/${p.id}/48/48'">
+          </td>
+          <td>
+            <strong>${p.name}</strong><br>
+            <small class="text-muted" style="max-width:200px;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.description || '—'}</small>
+          </td>
+          <td>${catMap[p.category_id] || '—'}</td>
+          <td><strong class="price">${formatPrice(p.price)}</strong></td>
+          <td><span class="${p.stock_quantity <= 10 ? (p.stock_quantity === 0 ? 'stock-zero' : 'stock-low') : 'stock-ok'}">${p.stock_quantity}</span></td>
+          <td>${p.is_featured ? '<span class="badge badge-warning">⭐ Featured</span>' : '—'}</td>
+          <td><span class="badge badge-${p.is_available ? 'success' : 'error'}">${p.is_available ? 'Available' : 'Unavailable'}</span></td>
+          <td>
+            <div class="actions">
+              <button class="btn btn-outline btn-sm" onclick="editProduct(${p.id})">Edit</button>
+              <button class="btn btn-ghost btn-sm" style="color:var(--error)" onclick="deleteProduct(${p.id})">Delete</button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function filterProducts() {
+      const q = document.getElementById('product-search').value.toLowerCase();
+      const filtered = allProducts.filter(p => p.name.toLowerCase().includes(q) || (p.description||'').toLowerCase().includes(q));
+      renderProducts(filtered);
+    }
+
+    // Image preview
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('p-img').addEventListener('input', function() {
+        const wrapper = document.getElementById('img-preview-wrapper');
+        const preview = document.getElementById('img-preview');
+        if (this.value) { wrapper.style.display = 'block'; preview.src = this.value; }
+        else { wrapper.style.display = 'none'; }
+      });
+    });
+
+    loadAdminProducts();
+  </script>
+</body>
+</html>

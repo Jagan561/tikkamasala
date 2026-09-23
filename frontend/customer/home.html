@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Home — Tikka Masala Chat Corner</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/customer.css">
+</head>
+<body>
+<!-- Navbar -->
+<nav class="navbar">
+  <a href="/customer/home.html" class="navbar-brand">
+    <div class="navbar-logo">🫙</div>
+    <div class="navbar-brand-text">
+      <span class="brand-name">Tikka Masala</span>
+      <span class="brand-tagline">Chat Corner</span>
+    </div>
+  </a>
+  <button class="hamburger" id="hamburger" onclick="document.getElementById('nav-menu').classList.toggle('open')">
+    <span></span><span></span><span></span>
+  </button>
+  <ul class="navbar-nav" id="nav-menu">
+    <li><a href="/customer/home.html" class="nav-link active">🏠 Home</a></li>
+    <li><a href="/customer/menu.html" class="nav-link">🍽️ Menu</a></li>
+    <li><a href="/customer/my-orders.html" class="nav-link">📋 My Orders</a></li>
+    <li>
+      <a href="/customer/cart.html" class="nav-link" style="position:relative">
+        🛒 Cart
+        <span class="badge-count cart-badge hidden">0</span>
+      </a>
+    </li>
+    <li><a href="/customer/profile.html" class="nav-link">👤 Profile</a></li>
+    <li><button class="btn btn-outline btn-sm" style="color:#fff;border-color:rgba(255,255,255,.4)" onclick="logout()">Logout</button></li>
+  </ul>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-content">
+    <div class="hero-eyebrow">🌶️ Fresh Daily — Delivered Hot</div>
+    <h1>Authentic <span>Chaat</span>.<br>Freshly Made.<br>Delivered to You.</h1>
+    <p class="hero-subtitle">Experience the real taste of Indian street food from Tikka Masala Chat Corner, now at your doorstep.</p>
+    <div class="hero-actions">
+      <a href="/customer/menu.html" class="btn btn-accent btn-lg">ORDER NOW 🍽️</a>
+      <a href="#popular" class="btn btn-lg" style="background:rgba(255,255,255,.15);color:#fff;border:2px solid rgba(255,255,255,.3)">View Menu</a>
+    </div>
+  </div>
+</section>
+
+<!-- Info Cards -->
+<section class="section" style="background:var(--bg-alt)">
+  <div class="container">
+    <div class="grid-3">
+      <div class="card" style="border-top:4px solid var(--primary)">
+        <div class="card-body text-center">
+          <div style="font-size:3rem;margin-bottom:.5rem">🛵</div>
+          <h3 style="font-size:1.1rem">Fast Delivery</h3>
+          <p class="text-muted">Within 3 km from our shop. Hot food at your door!</p>
+        </div>
+      </div>
+      <div class="card" style="border-top:4px solid var(--secondary)">
+        <div class="card-body text-center">
+          <div style="font-size:3rem;margin-bottom:.5rem">🌶️</div>
+          <h3 style="font-size:1.1rem">Authentic Recipes</h3>
+          <p class="text-muted">Traditional chaat flavors made fresh every day.</p>
+        </div>
+      </div>
+      <div class="card" style="border-top:4px solid var(--accent)">
+        <div class="card-body text-center">
+          <div style="font-size:3rem;margin-bottom:.5rem">🔒</div>
+          <h3 style="font-size:1.1rem">Secure Payments</h3>
+          <p class="text-muted">Pay safely via Razorpay — UPI, cards, wallets.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Popular items -->
+<section class="section" id="popular">
+  <div class="container">
+    <div class="section-title">
+      <h2>⭐ Popular Items</h2>
+      <p>Our customers' all-time favourites</p>
+    </div>
+    <div class="grid-3" id="popular-grid">
+      <p class="text-muted text-center" style="grid-column:1/-1">Loading...</p>
+    </div>
+    <div class="text-center mt-3">
+      <a href="/customer/menu.html" class="btn btn-primary btn-lg">View Full Menu →</a>
+    </div>
+  </div>
+</section>
+
+<!-- Shop Info -->
+<section class="section" style="background:linear-gradient(135deg, var(--primary-dark), var(--primary))">
+  <div class="container text-center" style="color:#fff">
+    <h2 style="color:#fff;margin-bottom:1rem">📍 Visit Us</h2>
+    <p style="color:rgba(255,255,255,.85);font-size:1.05rem">Tikka Masala Chat Corner<br>Available for delivery within 3 km radius.</p>
+    <div style="display:flex;justify-content:center;gap:2rem;margin-top:2rem;flex-wrap:wrap">
+      <div><div style="font-size:2rem">🕐</div><div style="color:rgba(255,255,255,.8);font-size:.9rem">Open daily<br>10 AM – 10 PM</div></div>
+      <div><div style="font-size:2rem">📞</div><div style="color:rgba(255,255,255,.8);font-size:.9rem">Order via<br>this app</div></div>
+      <div><div style="font-size:2rem">🛵</div><div style="color:rgba(255,255,255,.8);font-size:.9rem">Delivery charge<br>₹30 only</div></div>
+    </div>
+  </div>
+</section>
+
+<div id="toast-container"></div>
+<script src="/js/api.js"></script>
+<script src="/js/auth.js"></script>
+<script src="/js/cart.js"></script>
+<script src="/js/products.js"></script>
+<script>
+  requireCustomerAuth();
+  // Load popular products
+  (async () => {
+    try {
+      const products = await api.get('/api/products');
+      const grid = document.getElementById('popular-grid');
+      const featured = products.filter(p => p.is_featured && p.is_available).slice(0, 3);
+      if (!featured.length) { grid.innerHTML = '<p class="text-muted text-center">No featured items yet.</p>'; return; }
+      _products = products;
+      const cats = await api.get('/api/categories');
+      _categories = cats;
+      grid.innerHTML = featured.map(p => renderProductCard(p)).join('');
+    } catch(err) { console.error(err); }
+  })();
+  loadCart();
+</script>
+</body>
+</html>

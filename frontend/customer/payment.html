@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payment — Tikka Masala Chat Corner</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/customer.css">
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+</head>
+<body>
+<div class="auth-page">
+  <div class="auth-card" style="max-width:480px">
+    <div class="auth-logo">
+      <div class="auth-logo-icon">💳</div>
+      <h1 class="auth-title">Complete Payment</h1>
+      <p class="auth-subtitle">Secure payment powered by Razorpay</p>
+    </div>
+
+    <div class="order-summary" style="margin-bottom:1.5rem">
+      <div class="order-summary-row">
+        <span>Order Number</span>
+        <strong id="pay-order-number">—</strong>
+      </div>
+      <div class="order-summary-row total">
+        <span>Total Amount</span>
+        <span class="amount" id="pay-total">—</span>
+      </div>
+    </div>
+
+    <div class="alert alert-info" style="margin-bottom:1rem">
+      🔒 Payment is processed securely by Razorpay. We never store your card details.
+    </div>
+
+    <button class="btn btn-primary btn-block btn-lg" id="pay-btn" onclick="startPayment()">
+      💳 Pay Now
+    </button>
+    <a href="/customer/checkout.html" class="btn btn-ghost btn-block mt-1">← Go Back</a>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+<div id="loading-overlay" class="loading-overlay hidden">
+  <div style="text-align:center">
+    <div class="spinner" style="width:3rem;height:3rem;border-width:4px;color:var(--primary)"></div>
+    <p style="margin-top:1rem;font-weight:600;color:var(--text-dark)">Verifying payment...</p>
+  </div>
+</div>
+
+<script src="/js/api.js"></script>
+<script src="/js/auth.js"></script>
+<script src="/js/payment.js"></script>
+<script>
+  requireCustomerAuth();
+  const orderId = sessionStorage.getItem('pending_order_id');
+  const orderNumber = sessionStorage.getItem('pending_order_number');
+  const total = sessionStorage.getItem('pending_order_total');
+
+  if (!orderId) {
+    showToast('No pending order found.', 'error');
+    setTimeout(() => window.location.href = '/customer/cart.html', 2000);
+  } else {
+    document.getElementById('pay-order-number').textContent = orderNumber || '—';
+    document.getElementById('pay-total').textContent = formatPrice(total);
+  }
+
+  function startPayment() {
+    if (!orderId) { showToast('Invalid order.', 'error'); return; }
+    initiatePayment(parseInt(orderId));
+  }
+</script>
+</body>
+</html>

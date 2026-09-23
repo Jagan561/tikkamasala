@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register — Tikka Masala Chat Corner</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/customer.css">
+</head>
+<body>
+  <div class="auth-page">
+    <div class="auth-card">
+      <div class="auth-logo">
+        <div class="auth-logo-icon">🫙</div>
+        <h1 class="auth-title">Create Account</h1>
+        <p class="auth-subtitle">Join Tikka Masala Chat Corner</p>
+      </div>
+
+      <form id="register-form" autocomplete="off">
+        <!-- Step 1: Name & Mobile -->
+        <div id="step-mobile">
+          <div class="form-group">
+            <label class="form-label" for="name">👤 Full Name</label>
+            <input class="form-control" type="text" id="name" placeholder="Your full name" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="mobile">📱 Mobile Number</label>
+            <input class="form-control" type="tel" id="mobile" placeholder="10-digit mobile" maxlength="10" required>
+          </div>
+          <button type="button" class="btn btn-primary btn-block" id="send-otp-btn" onclick="handleSendOTP()">
+            Send OTP
+          </button>
+        </div>
+
+        <!-- Step 2: OTP -->
+        <div id="otp-section" class="hidden" style="margin-top:1.5rem">
+          <p class="text-center mb-2" style="font-weight:600">Enter the 6-digit OTP sent to your mobile</p>
+          <div class="otp-inputs" id="otp-boxes">
+            <input class="otp-box" type="tel" maxlength="1">
+            <input class="otp-box" type="tel" maxlength="1">
+            <input class="otp-box" type="tel" maxlength="1">
+            <input class="otp-box" type="tel" maxlength="1">
+            <input class="otp-box" type="tel" maxlength="1">
+            <input class="otp-box" type="tel" maxlength="1">
+          </div>
+          <button type="button" class="btn btn-secondary btn-block" id="verify-otp-btn" onclick="handleVerifyOTP()">
+            Verify OTP
+          </button>
+          <div class="text-center mt-1">
+            <button type="button" class="btn btn-ghost btn-sm" onclick="handleSendOTP()">Resend OTP</button>
+          </div>
+        </div>
+
+        <!-- Step 3: Password -->
+        <div id="password-section" class="hidden" style="margin-top:1.5rem">
+          <div class="alert alert-success">✅ Mobile verified! Create your password.</div>
+          <div class="form-group">
+            <label class="form-label" for="password">🔒 Password</label>
+            <input class="form-control" type="password" id="password" placeholder="Min 6 characters" minlength="6" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="confirm-password">🔒 Confirm Password</label>
+            <input class="form-control" type="password" id="confirm-password" placeholder="Repeat password" required>
+          </div>
+          <button type="button" class="btn btn-primary btn-block btn-lg" id="register-btn" onclick="handleRegister()">
+            Create Account 🎉
+          </button>
+        </div>
+      </form>
+
+      <div class="divider"><span>OR</span></div>
+      <div class="text-center">
+        <p class="text-muted mb-1">Already have an account?</p>
+        <a href="/customer/login.html" class="btn btn-outline btn-block">Login</a>
+      </div>
+    </div>
+  </div>
+  <div id="toast-container"></div>
+  <script src="/js/api.js"></script>
+  <script src="/js/auth.js"></script>
+  <script>
+    redirectIfLoggedIn('customer');
+    initOTPBoxes('#otp-boxes');
+  </script>
+</body>
+</html>

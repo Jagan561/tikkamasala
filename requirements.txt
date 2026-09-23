@@ -1,0 +1,15 @@
+﻿fastapi
+uvicorn[standard]
+sqlalchemy
+aiosqlite
+pydantic-settings
+pydantic[email]
+python-jose[cryptography]
+passlib[bcrypt]
+razorpay
+slowapi
+python-multipart
+boto3
+python-dotenv
+httpx
+aiofiles

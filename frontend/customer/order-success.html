@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Order Successful — Tikka Masala Chat Corner</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/customer.css">
+  <style>
+    .success-page { min-height:100vh; display:flex; align-items:center; justify-content:center; background:var(--bg); padding:2rem; }
+    .success-card { background:#fff; border-radius:var(--radius-xl); padding:3rem 2.5rem; text-align:center; max-width:480px; width:100%; box-shadow:var(--shadow-lg); }
+    .success-icon { font-size:5rem; animation:pop .5s cubic-bezier(.175,.885,.32,1.275); }
+    @keyframes pop { from{transform:scale(0)} to{transform:scale(1)} }
+    .confetti-bar { height: 6px; background: linear-gradient(90deg, var(--primary), var(--secondary), var(--accent), var(--primary)); border-radius:999px; margin-bottom:2rem; animation:shimmer 2s infinite; }
+    @keyframes shimmer { 0%,100%{opacity:1} 50%{opacity:.6} }
+  </style>
+</head>
+<body>
+<div class="success-page">
+  <div class="success-card">
+    <div class="confetti-bar"></div>
+    <div class="success-icon">🎉</div>
+    <h1 style="margin:.75rem 0 .5rem;color:var(--success)">Order Successful!</h1>
+    <p class="text-muted mb-2">Your order has been placed and payment confirmed.</p>
+
+    <div class="order-summary" style="margin:1.5rem 0">
+      <div class="order-summary-row">
+        <span>Order Number</span>
+        <strong id="success-order-number">—</strong>
+      </div>
+      <div class="order-summary-row">
+        <span>Payment</span>
+        <span class="badge badge-success">✅ PAID</span>
+      </div>
+    </div>
+
+    <div class="alert alert-info" style="margin-bottom:1.5rem">
+      📱 A delivery OTP has been sent to your registered mobile number. Share it with the delivery person when your order arrives.
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:.75rem">
+      <a id="track-btn" href="#" class="btn btn-primary btn-lg">Track Your Order 🛵</a>
+      <a href="/customer/my-orders.html" class="btn btn-outline">My Orders</a>
+      <a href="/customer/menu.html" class="btn btn-ghost">Order More</a>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+<script src="/js/api.js"></script>
+<script src="/js/auth.js"></script>
+<script>
+  requireCustomerAuth();
+  const params = new URLSearchParams(location.search);
+  const orderId = params.get('order_id');
+  const orderNumber = params.get('order_number');
+  document.getElementById('success-order-number').textContent = orderNumber || '—';
+  document.getElementById('track-btn').href = `/customer/track-order.html?order_id=${orderId}`;
+  // Clear session
+  sessionStorage.removeItem('pending_order_id');
+  sessionStorage.removeItem('pending_order_number');
+  sessionStorage.removeItem('pending_order_total');
+</script>
+</body>
+</html>

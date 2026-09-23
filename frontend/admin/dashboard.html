@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard — Admin | Tikka Masala Chat Corner</title>
+  <meta name="description" content="Admin dashboard with real-time order stats and live notifications.">
+  <link rel="stylesheet" href="../css/main.css">
+  <link rel="stylesheet" href="../css/admin.css">
+</head>
+<body class="admin-body">
+
+  <div class="admin-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-brand">
+        <a href="dashboard.html" class="sidebar-logo">
+          <div class="sidebar-logo-icon">🍛</div>
+          <div>
+            <div class="sidebar-logo-text">Tikka Masala</div>
+            <div class="sidebar-logo-sub">Admin Panel</div>
+          </div>
+        </a>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="sidebar-section-label">Main</div>
+        <a href="dashboard.html" class="sidebar-link active" id="nav-dashboard">
+          <span class="link-icon">📊</span> Dashboard
+        </a>
+        <a href="orders.html" class="sidebar-link" id="nav-orders">
+          <span class="link-icon">🛍️</span> Orders
+          <span class="link-badge hidden" id="sidebar-order-badge">0</span>
+        </a>
+
+        <div class="sidebar-section-label">Catalog</div>
+        <a href="products.html" class="sidebar-link" id="nav-products">
+          <span class="link-icon">🍽️</span> Products
+        </a>
+        <a href="categories.html" class="sidebar-link" id="nav-categories">
+          <span class="link-icon">🏷️</span> Categories
+        </a>
+        <a href="inventory.html" class="sidebar-link" id="nav-inventory">
+          <span class="link-icon">📦</span> Inventory
+        </a>
+
+        <div class="sidebar-section-label">Analytics</div>
+        <a href="sales.html" class="sidebar-link" id="nav-sales">
+          <span class="link-icon">📈</span> Sales Charts
+        </a>
+        <a href="reports.html" class="sidebar-link" id="nav-reports">
+          <span class="link-icon">📋</span> Reports
+        </a>
+        <a href="customers.html" class="sidebar-link" id="nav-customers">
+          <span class="link-icon">👥</span> Customers
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="sidebar-user">
+          <div class="sidebar-avatar">👤</div>
+          <div>
+            <div class="sidebar-username admin-username">Admin</div>
+            <div class="sidebar-role">Administrator</div>
+          </div>
+          <button class="btn btn-ghost btn-sm admin-logout" title="Logout" style="margin-left:auto;color:rgba(255,255,255,.6);font-size:1.2rem">⏏</button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="admin-content">
+      <!-- Header -->
+      <header class="admin-header">
+        <div style="display:flex;align-items:center;gap:1rem">
+          <button class="sidebar-toggle" id="sidebar-toggle">☰</button>
+          <div>
+            <div class="admin-page-title">Dashboard</div>
+            <div class="text-muted" style="font-size:.8rem" id="last-updated">Live data</div>
+          </div>
+        </div>
+        <div class="admin-header-right">
+          <button class="notification-btn" id="notif-btn" title="Notifications">
+            🔔
+            <div class="notification-badge hidden" id="notification-badge">0</div>
+          </button>
+          <button class="btn btn-primary btn-sm" onclick="location.href='orders.html'">View Orders</button>
+        </div>
+      </header>
+
+      <!-- Main -->
+      <main class="admin-main">
+        <!-- New Order Notifications -->
+        <div id="notifications-container"></div>
+
+        <!-- Stat Cards -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon">🛍️</div>
+            <div class="stat-info">
+              <div class="stat-label">Orders Today</div>
+              <div class="stat-value" id="stat-orders-today">—</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">💰</div>
+            <div class="stat-info">
+              <div class="stat-label">Sales Today</div>
+              <div class="stat-value" id="stat-sales-today">—</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">⏳</div>
+            <div class="stat-info">
+              <div class="stat-label">Pending</div>
+              <div class="stat-value" id="stat-pending">—</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">🍳</div>
+            <div class="stat-info">
+              <div class="stat-label">Preparing</div>
+              <div class="stat-value" id="stat-preparing">—</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">✅</div>
+            <div class="stat-info">
+              <div class="stat-label">Completed Today</div>
+              <div class="stat-value" id="stat-completed">—</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">👥</div>
+            <div class="stat-info">
+              <div class="stat-label">Total Customers</div>
+              <div class="stat-value" id="stat-customers">—</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">⚠️</div>
+            <div class="stat-info">
+              <div class="stat-label">Low Stock Items</div>
+              <div class="stat-value" id="stat-low-stock">—</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="admin-section" style="margin-bottom:1.5rem">
+          <div class="admin-section-header">
+            <div class="admin-section-title">⚡ Quick Actions</div>
+          </div>
+          <div class="admin-section-body" style="display:flex;gap:1rem;flex-wrap:wrap">
+            <a href="orders.html" class="btn btn-primary">🛍️ Manage Orders</a>
+            <a href="products.html" class="btn btn-secondary">🍽️ Add Product</a>
+            <a href="inventory.html" class="btn btn-outline">📦 Check Stock</a>
+            <a href="sales.html" class="btn btn-ghost">📈 View Analytics</a>
+          </div>
+        </div>
+
+        <!-- Recent Orders -->
+        <div class="admin-section">
+          <div class="admin-section-header">
+            <div class="admin-section-title">🕐 Recent Orders</div>
+            <a href="orders.html" class="btn btn-ghost btn-sm">View All →</a>
+          </div>
+          <div class="table-wrapper">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Order #</th>
+                  <th>Customer</th>
+                  <th>Total</th>
+                  <th>Type</th>
+                  <th>Status</th>
+                  <th>Time</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="recent-orders-body">
+                <tr><td colspan="7" class="text-center text-muted" style="padding:2rem">Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <div id="toast-container"></div>
+
+  <script src="../js/api.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/websocket.js"></script>
+  <script src="../js/admin.js"></script>
+  <script>
+    requireAdminAuth();
+    initAdminNav();
+    loadDashboard();
+    initAdminWebSocket();
+
+    // Load recent orders (first 5)
+    async function loadRecentOrders() {
+      const tbody = document.getElementById('recent-orders-body');
+      try {
+        const orders = await api.get('/api/admin/orders?limit=5');
+        if (!orders.length) {
+          tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted" style="padding:2rem">No orders yet.</td></tr>';
+          return;
+        }
+        tbody.innerHTML = orders.slice(0,5).map(o => `
+          <tr>
+            <td><strong>${o.order_number}</strong></td>
+            <td>${o.customer_name}<br><small class="text-muted">${o.customer_mobile}</small></td>
+            <td><strong>${formatPrice(o.total)}</strong></td>
+            <td><span class="badge badge-secondary">${o.order_type}</span></td>
+            <td><span class="badge status-${o.status}">${o.status.replace(/_/g,' ')}</span></td>
+            <td>${timeAgo(o.created_at)}</td>
+            <td><a href="orders.html" class="btn btn-outline btn-sm">Manage</a></td>
+          </tr>
+        `).join('');
+      } catch(err) {
+        tbody.innerHTML = `<tr><td colspan="7"><div class="alert alert-error">${err.message}</div></td></tr>`;
+      }
+    }
+    loadRecentOrders();
+    document.getElementById('last-updated').textContent = 'Updated: ' + new Date().toLocaleTimeString('en-IN');
+    setInterval(() => { loadDashboard(); loadRecentOrders(); }, 30000);
+  </script>
+</body>
+</html>
