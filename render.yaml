@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: tikka-masala
+    runtime: python
+    rootDir: backend
+    buildCommand: pip install -r ../requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: DATABASE_URL
+        value: sqlite+aiosqlite:////var/data/tikkamasala.db
+      - key: FRONTEND_URL
+        value: https://tikka-masala.onrender.com
+      - key: CORS_ORIGINS
+        value: https://tikka-masala.onrender.com
+      - key: DEMO_MODE
+        value: "false"
+    disk:
+      name: tikka-masala-data
+      mountPath: /var/data
+      sizeGB: 1

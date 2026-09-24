@@ -2,7 +2,7 @@
 Application settings loaded from environment variables.
 """
 from pydantic_settings import BaseSettings
-from typing import Optional
+from typing import List, Optional
 from pathlib import Path
 
 # .env lives one level up from backend/
@@ -56,6 +56,8 @@ class Settings(BaseSettings):
     APP_HOST: str = "0.0.0.0"
     APP_PORT: int = 8000
     FRONTEND_URL: str = "http://localhost:5500"
+    CORS_ORIGINS: str = ""
+    CORS_ORIGINS_LIST: List[str] = []
 
     class Config:
         env_file = str(_env_file)
@@ -63,6 +65,11 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+
+if settings.CORS_ORIGINS:
+    settings.CORS_ORIGINS_LIST = [origin.strip() for origin in settings.CORS_ORIGINS.split(",") if origin.strip()]
+else:
+    settings.CORS_ORIGINS_LIST = [settings.FRONTEND_URL, "http://127.0.0.1:5500", "http://localhost:5500"]
 
 # Resolve relative SQLite URLs from the backend directory, independent of the
 # directory used to launch Uvicorn.

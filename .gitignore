@@ -32,6 +32,7 @@ Thumbs.db
 # Logs
 *.log
 logs/
+error_log.txt
 
 # Uploads
 uploads/
