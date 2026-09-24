@@ -1,7 +1,7 @@
 /**
  * API client — wraps fetch with auth headers + error handling.
  */
-const API_BASE = 'http://localhost:8000';
+const API_BASE = '';
 
 const api = {
   getToken() {
@@ -95,7 +95,6 @@ function setLoading(btn, loading, text = 'Loading...') {
   }
 }
 
-/* ── Format helpers ── */
 function formatPrice(n) { return '₹' + Number(n).toFixed(2).replace(/\.00$/, ''); }
 function formatDate(d)  { return d ? new Date(d).toLocaleString('en-IN') : '—'; }
 function timeAgo(d) {
@@ -107,3 +106,4 @@ function timeAgo(d) {
   if (h < 24) return `${h}h ago`;
   return `${Math.floor(h / 24)}d ago`;
 }
+

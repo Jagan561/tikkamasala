@@ -58,8 +58,7 @@ async function loadAdminOrders() {
 
 function getStatusButtons(orderId, status) {
   const next = {
-    'PAYMENT_VERIFIED': [['ACCEPTED','Accept','btn-primary'],['CANCELLED','Cancel','btn-ghost']],
-    'ACCEPTED':         [['PREPARING','Prepare','btn-secondary']],
+    'PAYMENT_VERIFIED': [['PREPARING','Start Preparing','btn-secondary'],['CANCELLED','Cancel','btn-ghost']],
     'PREPARING':        [['READY','Mark Ready','btn-accent']],
     'READY':            [['OUT_FOR_DELIVERY','Out for Delivery','btn-primary']],
     'OUT_FOR_DELIVERY': [['verify-otp','Verify OTP 🔑','btn-success']],
@@ -287,7 +286,11 @@ function initAdminNav() {
   const toggleBtn = document.getElementById('sidebar-toggle');
   const sidebar = document.querySelector('.sidebar');
   if (toggleBtn && sidebar) {
-    toggleBtn.addEventListener('click', () => sidebar.classList.toggle('open'));
+    toggleBtn.addEventListener('click', () => {
+      const isOpen = sidebar.classList.toggle('open');
+      const overlay = document.getElementById('sidebar-overlay');
+      if (overlay) overlay.classList.toggle('active', isOpen);
+    });
   }
 
   // Admin username display
@@ -299,8 +302,15 @@ function initAdminNav() {
     btn.addEventListener('click', () => logout('/admin/login.html'));
   });
 }
+// Close sidebar (called by overlay click)
+function closeSidebar() {
+  const sidebar = document.querySelector('.sidebar');
+  const overlay = document.getElementById('sidebar-overlay');
+  if (sidebar) sidebar.classList.remove('open');
+  if (overlay) overlay.classList.remove('active');
+}
 
-// ── New Order WebSocket handler ──────────────────────────────
+
 function initAdminWebSocket() {
   wsConnect();
   wsOn('NEW_ORDER', handleNewOrderNotification);
@@ -344,7 +354,7 @@ function handleNewOrderNotification(data) {
         </div>
         <div style="font-weight:700;color:var(--primary);margin-top:.5rem">${formatPrice(order.total)}</div>
         <div class="notification-actions">
-          <button class="btn btn-primary btn-sm" onclick="updateOrderStatus(${order.id},'ACCEPTED');document.getElementById('notif-${order.id}').remove()">✅ Accept</button>
+          <button class="btn btn-secondary btn-sm" onclick="updateOrderStatus(${order.id},'PREPARING');document.getElementById('notif-${order.id}').remove()">🍽️ Start Preparing</button>
           <button class="btn btn-ghost btn-sm" onclick="document.getElementById('notif-${order.id}').remove()">Dismiss</button>
         </div>
       </div>

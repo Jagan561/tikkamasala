@@ -39,7 +39,9 @@ function renderProducts() {
 
   let filtered = _products;
   if (_activeCategory) filtered = filtered.filter(p => p.category_id === _activeCategory);
-  if (_searchQuery)    filtered = filtered.filter(p => p.name.toLowerCase().includes(_searchQuery.toLowerCase()));
+  const availOnly = document.getElementById('avail-only')?.checked;
+  if (availOnly) filtered = filtered.filter(p => p.is_available);
+  if (_searchQuery) filtered = filtered.filter(p => p.name.toLowerCase().includes(_searchQuery.toLowerCase()));
 
   if (!filtered.length) {
     container.innerHTML = `
@@ -68,7 +70,7 @@ function renderProductCard(p) {
         <div class="food-card-name">${p.name}</div>
         <div class="food-card-desc">${p.description || ''}</div>
         <div class="food-card-footer">
-          <div class="food-card-price">₹${p.price}</div>
+          <div class="food-card-price">${typeof formatPrice === 'function' ? formatPrice(p.price) : '₹' + p.price}</div>
           ${p.is_available
             ? `<button class="btn btn-primary btn-sm" onclick="handleAddToCart(${p.id})">+ Add</button>`
             : `<span class="text-muted" style="font-size:.85rem">Unavailable</span>`

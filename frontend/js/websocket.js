@@ -9,7 +9,9 @@ function wsConnect() {
   const token = api.getToken();
   if (!token) return;
 
-  const wsUrl = `ws://localhost:8000/api/ws/orders?token=${encodeURIComponent(token)}`;
+  const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+  const wsHost = window.location.host;
+  const wsUrl = `${wsProtocol}//${wsHost}/api/ws/orders?token=${encodeURIComponent(token)}`;
   _ws = new WebSocket(wsUrl);
 
   _ws.onopen = () => {

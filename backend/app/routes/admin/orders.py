@@ -20,8 +20,7 @@ from pydantic import BaseModel
 router = APIRouter(prefix="/api/admin", tags=["Admin"])
 
 VALID_TRANSITIONS = {
-    "PAYMENT_VERIFIED": ["ACCEPTED", "CANCELLED"],
-    "ACCEPTED": ["PREPARING", "CANCELLED"],
+    "PAYMENT_VERIFIED": ["PREPARING", "CANCELLED"],
     "PREPARING": ["READY", "READY_FOR_PICKUP"],
     "READY": ["OUT_FOR_DELIVERY"],
     "READY_FOR_PICKUP": ["PICKED_UP"],
@@ -157,7 +156,6 @@ async def update_order_status(order_id: int, req: UpdateStatusRequest, request: 
 
     # Real-time: notify customer
     status_messages = {
-        "ACCEPTED": "Your order has been accepted! 🎉",
         "PREPARING": "Your order is being prepared. 🍽️",
         "READY": "Your order is ready!",
         "READY_FOR_PICKUP": "Your order is ready for pickup!",

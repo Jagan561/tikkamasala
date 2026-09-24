@@ -5,12 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Orders — Admin | Tikka Masala Chat Corner</title>
   <meta name="description" content="Manage all customer orders, update statuses, and verify delivery OTPs.">
-  <link rel="stylesheet" href="../css/main.css">
+  <link rel="stylesheet" href="../css/main.css?v=2">
   <link rel="stylesheet" href="../css/admin.css">
 </head>
 <body class="admin-body">
 
   <div class="admin-layout">
+    <!-- Mobile sidebar overlay -->
+    <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
     <!-- Sidebar -->
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-brand">
@@ -70,7 +72,6 @@
               <option value="">All Statuses</option>
               <option value="NEW">New</option>
               <option value="PAYMENT_VERIFIED">Payment Verified</option>
-              <option value="ACCEPTED">Accepted</option>
               <option value="PREPARING">Preparing</option>
               <option value="READY">Ready</option>
               <option value="OUT_FOR_DELIVERY">Out for Delivery</option>
@@ -154,7 +155,7 @@
 
   <div id="toast-container"></div>
 
-  <script src="../js/api.js"></script>
+  <script src="../js/api.js?v=3"></script>
   <script src="../js/auth.js"></script>
   <script src="../js/websocket.js"></script>
   <script src="../js/admin.js"></script>

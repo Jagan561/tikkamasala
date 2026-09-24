@@ -5,12 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Reports — Admin | Tikka Masala Chat Corner</title>
   <meta name="description" content="Tabular sales and product reports for the Tikka Masala Chat Corner admin panel.">
-  <link rel="stylesheet" href="../css/main.css">
+  <link rel="stylesheet" href="../css/main.css?v=2">
   <link rel="stylesheet" href="../css/admin.css">
 </head>
 <body class="admin-body">
 
   <div class="admin-layout">
+    <!-- Mobile sidebar overlay -->
+    <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-brand">
         <a href="dashboard.html" class="sidebar-logo">
@@ -164,7 +166,7 @@
     }
   </style>
 
-  <script src="../js/api.js"></script>
+  <script src="../js/api.js?v=3"></script>
   <script src="../js/auth.js"></script>
   <script src="../js/admin.js"></script>
   <script>

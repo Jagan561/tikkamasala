@@ -6,7 +6,8 @@ from typing import Optional
 from pathlib import Path
 
 # .env lives one level up from backend/
-_env_file = Path(__file__).resolve().parents[3] / ".env"
+_project_dir = Path(__file__).resolve().parents[2]
+_env_file = _project_dir.parent / ".env"
 
 
 class Settings(BaseSettings):
@@ -62,3 +63,10 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+
+# Resolve relative SQLite URLs from the backend directory, independent of the
+# directory used to launch Uvicorn.
+if settings.DATABASE_URL.startswith("sqlite") and "///" in settings.DATABASE_URL:
+    _sqlite_path = settings.DATABASE_URL.split("///", 1)[1]
+    if not Path(_sqlite_path).is_absolute():
+        settings.DATABASE_URL = f"sqlite+aiosqlite:///{_project_dir / _sqlite_path}"

@@ -5,22 +5,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Tikka Masala Chat Corner — Authentic Chaat Delivered</title>
   <meta name="description" content="Order authentic street chaat from Tikka Masala Chat Corner. Pani Puri, Bhel Puri, Samosa and more — delivered fresh to your door within 3 km.">
-  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/main.css?v=2">
   <link rel="stylesheet" href="/css/customer.css">
   <style>
-    .home-hero { background: linear-gradient(135deg, #9B0A22 0%, #C8102E 45%, #E87722 100%); min-height: 100vh; display: flex; flex-direction: column; }
+    .home-hero { background: var(--bg-alt); min-height: 100vh; display: flex; flex-direction: column; border-bottom: 1px solid var(--border); }
     .splash-content { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 3rem 2rem; text-align: center; position: relative; overflow: hidden; }
-    .splash-content::before { content: '🌶'; font-size: 18rem; position: absolute; right: -4rem; top: 50%; transform: translateY(-50%); opacity: .04; pointer-events: none; }
-    .splash-logo { font-size: 5rem; margin-bottom: 1rem; animation: bounce .8s ease infinite alternate; }
-    @keyframes bounce { to { transform: translateY(-12px); } }
-    .splash-title { font-size: clamp(2.5rem, 7vw, 5rem); color: #fff; font-weight: 900; line-height: 1.1; margin-bottom: .75rem; }
-    .splash-title span { color: var(--accent); }
-    .splash-sub { color: rgba(255,255,255,.8); font-size: 1.15rem; margin-bottom: 3rem; max-width: 500px; }
+    .splash-logo { font-size: 5rem; margin-bottom: 1rem; }
+    .splash-title { font-family: var(--font-display); font-size: clamp(2.5rem, 7vw, 5rem); color: var(--text-dark); font-weight: 700; line-height: 1.1; margin-bottom: .75rem; letter-spacing: -0.02em; }
+    .splash-title span { color: var(--primary); }
+    .splash-sub { color: var(--text-body); font-size: 1.15rem; margin-bottom: 3rem; max-width: 600px; }
     .splash-actions { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; }
-    .features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; padding: 2rem; background: rgba(0,0,0,.15); }
-    .feature { text-align: center; color: rgba(255,255,255,.85); padding: 1.25rem; }
+    .features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; padding: 2rem; background: #fff; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+    .feature { text-align: center; color: var(--text-body); padding: 1.25rem; }
     .feature-icon { font-size: 2.5rem; margin-bottom: .5rem; }
-    .feature-text { font-size: .9rem; font-weight: 500; }
+    .feature-text { font-size: .95rem; font-weight: 600; color: var(--text-dark); text-transform: uppercase; letter-spacing: 0.05em; }
     @media(max-width:600px) { .features { grid-template-columns: 1fr; } }
   </style>
 </head>
@@ -31,8 +29,8 @@
       <h1 class="splash-title">Tikka Masala<br><span>Chat Corner</span></h1>
       <p class="splash-sub">Authentic street chaat, freshly made and delivered hot to your door.</p>
       <div class="splash-actions">
-        <a href="/customer/login.html" class="btn btn-accent btn-lg">Order Now 🍽️</a>
-        <a href="/customer/register.html" class="btn btn-outline btn-lg" style="color:#fff;border-color:#fff">Create Account</a>
+        <a href="/customer/login.html" class="btn btn-primary btn-lg" style="border-radius: 25px;">Order Now 🍽️</a>
+        <a href="/customer/register.html" class="btn btn-outline btn-lg" style="border-radius: 25px;">Create Account</a>
       </div>
     </div>
     <div class="features">
@@ -42,7 +40,7 @@
     </div>
   </div>
   <div id="toast-container"></div>
-  <script src="/js/api.js"></script>
+  <script src="/js/api.js?v=3"></script>
   <script>
     // Redirect if already logged in
     if (localStorage.getItem('tm_token') && localStorage.getItem('tm_role') === 'customer') {

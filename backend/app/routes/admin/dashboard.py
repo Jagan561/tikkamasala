@@ -39,7 +39,7 @@ async def get_dashboard(request: Request, db: AsyncSession = Depends(get_db)):
 
     # Pending orders
     pending_result = await db.execute(
-        select(func.count(Order.id)).where(Order.status.in_(["PAYMENT_VERIFIED", "ACCEPTED"]))
+        select(func.count(Order.id)).where(Order.status == "PAYMENT_VERIFIED")
     )
     pending = pending_result.scalar() or 0
 

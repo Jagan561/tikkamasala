@@ -27,7 +27,7 @@ async def get_products(
     search: Optional[str] = Query(None),
     db: AsyncSession = Depends(get_db),
 ):
-    query = select(Product)
+    query = select(Product).join(Category, Product.category_id == Category.id).where(Category.is_active == True)
     if category_id:
         query = query.where(Product.category_id == category_id)
     if available_only:

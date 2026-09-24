@@ -20,7 +20,7 @@ async function addToCart(productId, quantity = 1) {
     _cart = await api.post('/api/cart/items', { product_id: productId, quantity });
     updateCartUI();
     updateCartBadge();
-    showToast('Added to cart!', 'success');
+    showAddedToCartToast();
     return true;
   } catch (err) {
     showToast(err.message, 'error');
@@ -125,4 +125,46 @@ async function changeQty(itemId, qty) {
 
 async function removeItem(itemId) {
   await removeCartItem(itemId);
+}
+
+function showAddedToCartToast() {
+  let container = document.getElementById('toast-container');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'toast-container';
+    document.body.appendChild(container);
+  }
+
+  const toast = document.createElement('div');
+  toast.className = 'toast toast-success toast-cart';
+  toast.innerHTML = `
+    <span class="toast-icon">✅</span>
+    <div class="toast-cart-body">
+      <div class="toast-msg">Added to cart!</div>
+      <button type="button" class="toast-view-cart">View Cart →</button>
+    </div>
+    <button type="button" class="toast-close" aria-label="Close">×</button>
+  `;
+
+  const closeBtn = toast.querySelector('.toast-close');
+  const viewBtn = toast.querySelector('.toast-view-cart');
+
+  closeBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    toast.remove();
+  });
+
+  viewBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    window.location.href = '/customer/cart.html';
+  });
+
+  container.appendChild(toast);
+  setTimeout(() => {
+    if (!toast.isConnected) return;
+    toast.style.animation = 'slideOutRight .3s ease forwards';
+    setTimeout(() => toast.remove(), 300);
+  }, 6000);
 }
